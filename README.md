@@ -12,7 +12,7 @@
 
 #### Potential Challenges
 - Finding the data (for state/country)!
-- New York city is not split by county in the NYT dataset but liekly will be in the census data
+- New York city is not split by county in the NYT dataset but likely will be in the census data
 - Colin seems like he is gone so we may be a man down
 
 #### Scoping/ Complexity
