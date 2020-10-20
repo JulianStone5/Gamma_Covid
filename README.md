@@ -1,9 +1,9 @@
 # Gamma_Covid
 
 ### Planning/Check-in
-####Question
-- What correlations are there bewtween counties with higher and lower GDPs and tehir covid rates acorss the pandemic?
-- If there is a correlation is this the cause or are ther other contributing factors
+#### Question
+- What relationships are there bewtween GDP per capita and cases rate? Do these change when moving from a county-level to a country-level population?
+- If there is a relationship, would factors could be the causes?
 
 #### What data will be used
 - Use the NYT data that is split via county
@@ -11,7 +11,7 @@
 - Dont know how trustworthy but https://ourworldindata.org/coronavirus, has some data for countries around the world (Link: https://github.com/owid/covid-19-data/tree/master/public/data)
 
 #### Potential Challenges
-- Finding the data!
+- Finding the data (for state/country)!
 - New York city is not split by county in the NYT dataset but liekly will be in the census data
 - Colin seems like he is gone so we may be a man down
 
