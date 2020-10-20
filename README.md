@@ -2,7 +2,7 @@
 
 ### Planning/Check-in
 #### Question
-- What relationships are there bewtween GDP per capita and cases rate? Do these change when moving from a county-level to a country-level population?
+- What relationships are there bewtween GDP and cases rate? Do these change when moving from a county-level to a country-level population?
 - If there is a relationship, would factors could be the causes?
 
 #### What data will be used
