@@ -8,6 +8,7 @@
 #### What data will be used
 - Use the NYT data that is split via county
 - Obtain census data that contains gdp or medan household income? (unsure if this available)
+- Dont know how trustworthy but https://ourworldindata.org/coronavirus, has some data for countries around the world (Link: https://github.com/owid/covid-19-data/tree/master/public/data)
 
 #### Potential Challenges
 - Finding the data!
