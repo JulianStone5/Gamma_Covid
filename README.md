@@ -9,6 +9,7 @@
 - Use the NYT data that is split via county
 - Obtain census data that contains gdp or medan household income? (unsure if this available)
 - Dont know how trustworthy but https://ourworldindata.org/coronavirus, has some data for countries around the world (Link: https://github.com/owid/covid-19-data/tree/master/public/data)
+- county data wikipedia: https://en.wikipedia.org/wiki/List_of_United_States_counties_by_per_capita_income
 
 #### Potential Challenges
 - Finding the data (for state/country)!
