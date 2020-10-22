@@ -73,7 +73,7 @@ df_data_raw <-df_gdp %>%
   ## Whenever teh value of GDP is NA, we drop the country because we cant compare it to others. If teh value of a case/death count is NA, we set it to 0
               drop_na(gdp) %>% 
               replace_na(list("cases" = 0, "deaths" = 0, "cases_per1M" = 0,  "deaths_per1M" = 0)) %>% 
-              mutate(gdpPerCap = (gdp/population)) %>% 
+              mutate(gdpPerCap = gdp/(population*1000)) %>% 
               select(-iso_code, -gdp)
 df_data_raw
 ```
@@ -84,8 +84,23 @@ df_data_raw %>%
   filter(date == "2020-10-21") %>% 
   arrange(gdpPerCap) %>% 
   mutate(country = fct_reorder(country, desc(gdpPerCap))) %>% 
-  ggplot() + 
-  geom_point(aes(y = country, x = cases_per1M))
+  mutate( bin=cut_width(gdpPerCap, width=5, boundary=0) ) %>%
+  ggplot( aes(x=bin, y=cases_per1M, group=bin)) +
+  geom_boxplot(fill="#69b3a2") +
+  xlab("GDP per capita grouped by bins of 5,000")
+  # ggplot() + 
+  # geom_point(aes(y = country, x = cases_per1M))
+```
+```{r}
+p <- diamonds %>%
+  # Add a new column called 'bin': cut the initial 'carat' in bins
+  mutate( bin=cut_width(carat, width=0.5, boundary=0) ) %>%
+  
+  # plot
+  ggplot( aes(x=bin, y=price) ) +
+    geom_boxplot(fill="#69b3a2") +
+    xlab("Carat")
+p
 ```
 
 
