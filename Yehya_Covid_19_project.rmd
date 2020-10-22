@@ -29,15 +29,35 @@ curl::curl_download(
 )
 ## Loads the downloaded csv
 df_covid <- read_csv(filename_covid) %>% select(iso_code, location, date, total_cases, total_deaths, population)
-df_gdp <- read_csv(filename_gdp) %>% select("Country Code", "Country Name", "Indicator Name", "Indicator Code", "2019")
-summary(df_covid)
-summary(df_gdp)
+df_gdp <- read_csv(filename_gdp, skip = 1)
+# summary(df_covid)
+# summary(df_gdp)
+```
+```{r}
+gdp_covid <- df_gdp %>% select("iso_code", "location", "date", "total_cases_per_million", "total_deaths_per_million", "median_age", "gdp_per_capita") %>%
+  merge(df_covid) %>%
+  drop_na()
+gdp_covid
+
 ```
 
 # Join the Data
 <!-- -------------------------------------------------- -->
 ##Hopefully well be able to join the data using the ISO code, if not we can use the country name and see what problems that may bring
 
+```{r}
+gdp_covid %>% 
+  ggplot(aes(
+    x = gdp_per_capita,
+    y = total_cases_per_million
+  )) +
+  geom_point() +
+  labs(
+    x = "GDP per Capita",
+    y = "Total Cases per Million",
+    title = "Cases per Million People vs GDP per Capita"
+  )
+```
 
 # Work on the Data
 <!-- -------------------------------------------------- -->
