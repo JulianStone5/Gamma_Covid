@@ -70,12 +70,10 @@ df_data_raw <-df_gdp %>%
               by = "iso_code",
               na.rm = TRUE
             ) %>% 
-  ## Whenever teh value of GDP is NA, we drop the country because we cant compare it to others. If teh value of a case/death count is NA, we set it to 0
+  ## Whenever teh value of GDP is NA or contintne is NA, we drop the country because we cant compare it to others. If teh value of a case/death count is NA, we set it to 0
               drop_na(gdp) %>% 
-                mutate(cases = ifelse(is.na(cases), 0, cases)) %>% 
-                  mutate(deaths = ifelse(is.na(deaths), 0, deaths)) %>% 
-                    mutate(cases_per1M = ifelse(is.na(cases_per1M), 0, cases_per1M)) %>% 
-                      mutate(deaths_per1M = ifelse(is.na(deaths_per1M), 0, deaths_per1M))
+                drop_na(continent) %>% 
+                  replace_na(list("cases" = 0, "deaths" = 0, "cases_per1M" = 0,  "deaths_per1M" = 0))
 
 df_data_raw
 ```
@@ -86,92 +84,72 @@ df_data_raw
 
 We are going to calculate GDP per capita so that our measurements to compare the countries are standardized, and we can get more "honest" measurements and comparisons.
 ```{r normalize-gdp-data}
-
 df_data_norm <- df_data_raw %>% 
-                  mutate(gdpPerCap = (gdp/population)) %>% 
+                  mutate(gdpPerCap = (gdp/population), na.rm = TRUE) %>% 
                     select(continent, country, gdpPerCap, date, cases_per1M, deaths_per1M)
-
 df_data_norm
 ```
 
 
-```{r SA-plot}
+```{r SA-plot-latest}
+df_data_norm %>%
+  filter(continent == "South America") %>% 
+  filter(date == max(date)) %>% 
+  ggplot(
+    aes(gdpPerCap, cases_per1M, fill = country)
+  ) +
+  geom_col() +
+  theme_minimal() +
+  labs(
+    x = "GDP Per Capita",
+    y = "Cases (per 1,000,000 persons)"
+  )
+```
+
+```{r SA-plot-time}
 df_data_norm %>%
   filter(continent == "South America") %>% 
   ggplot(
-    aes(date, cases_per1M, color = fct_reorder2(country, date, cases_per1M))
+    aes(date, cases_per1M, color = country)
   ) +
   geom_line() +
-  ##scale_y_log10(labels = scales::label_number_si()) +
-  scale_color_discrete(name = "Country") +
+  scale_y_log10(labels = scales::label_number_si()) +
   theme_minimal() +
   labs(
     x = "Date",
     y = "Cases (per 1,000,000 persons)"
   )
 ```
-```{r Asia-plot}
-df_data_norm %>%
-  filter(continent == "Asia") %>% 
-  ggplot(
-    aes(date, cases_per1M, color = fct_reorder2(country, date, cases_per1M))
-  ) +
-  geom_line() +
-  ##scale_y_log10(labels = scales::label_number_si()) +
-  scale_color_discrete(name = "Country") +
-  theme_minimal() +
-  labs(
-    x = "Date",
-    y = "Cases (per 1,000,000 persons)"
-  )
-```
-
-```{r Africa-plot}
-df_data_norm %>%
-  filter(continent == "Africa") %>% 
-  ggplot(
-    aes(date, cases_per1M, color = fct_reorder2(country, date, cases_per1M))
-  ) +
-  geom_line() +
-  ##scale_y_log10(labels = scales::label_number_si()) +
-  scale_color_discrete(name = "Country") +
-  theme_minimal() +
-  labs(
-    x = "Date",
-    y = "Cases (per 1,000,000 persons)"
-  )
-```
-
-```{r Europe-plot}
+```{r SA-plot-latest}
 df_data_norm %>%
   filter(continent == "Europe") %>% 
+  filter(date == max(date)) %>% 
   ggplot(
-    aes(date, cases_per1M, color = fct_reorder2(country, date, cases_per1M))
+    aes(gdpPerCap, cases_per1M)
   ) +
-  geom_line() +
-  ##scale_y_log10(labels = scales::label_number_si()) +
-  scale_color_discrete(name = "Country") +
+  geom_point() +
   theme_minimal() +
   labs(
-    x = "Date",
+    x = "GDP Per Capita",
     y = "Cases (per 1,000,000 persons)"
   )
 ```
 
-```{r NA-plot}
-df_data_norm %>%
-  filter(continent == "North America") %>% 
-  ggplot(
-    aes(date, cases_per1M, color = fct_reorder2(country, date, cases_per1M))
-  ) +
-  geom_line() +
-  ##scale_y_log10(labels = scales::label_number_si()) +
-  scale_color_discrete(name = "Country") +
+```{r plot-general-data}
+df_continent <- df_data_norm %>% 
+                  group_by(continent) %>% 
+                   summarise_at(vars(gdpPerCap, cases_per1M, deaths_per1M), funs(mean(., na.rm=TRUE)))
+df_continent %>%
+  ggplot() +
+  geom_col(aes(gdpPerCap, cases_per1M), fill = "blue") +
+  geom_col(aes(gdpPerCap, deaths_per1M), fill = "red") +
+  geom_label_repel(aes(gdpPerCap, cases_per1M, label = continent))+
   theme_minimal() +
   labs(
-    x = "Date",
-    y = "Cases (per 1,000,000 persons)"
+    x = "Average GDP Per Capita",
+    y = "Average Cases/Deaths (per 1,000,000 persons)"
   )
 ```
+
 # Conclusion
 <!-- -------------------------------------------------- -->
