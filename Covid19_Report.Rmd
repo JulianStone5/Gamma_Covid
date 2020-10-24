@@ -1,0 +1,96 @@
+---
+title: "COVID19_Report"
+author: "Julian, Nabih, Nathan, and Yehya"
+date: 02-10-2020
+output:
+  github_document:
+    toc: true
+---
+
+```{r setup}
+library(tidyverse)
+```
+
+<!-- -------------------------------------------------- -->
+*Question*:
+
+
+<!-- -------------------------------------------------- -->
+*Background*:
+
+<!-- -------------------------------------------------- -->
+*Data*:
+
+# Getting the Data and tidying the data
+<!------------------------------------------------------>
+```{r load-covid-data}
+url_covid <- "https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/owid-covid-data.csv"
+
+## Set the filenames of the data to download
+filename_covid <- "./data/covid_countries.csv"
+filename_gdp <- "./data/gdp_countries.csv"
+
+## Download the data locally
+curl::curl_download(
+        url_covid,
+        destfile = filename_covid
+)
+
+## Loads the downloaded csv
+df_covid_temp <- read_csv(filename_covid) %>% 
+  select(iso_code, continent, date, total_cases, total_deaths, total_cases_per_million, total_deaths_per_million, population)
+
+df_gdp_temp <- read_csv(filename_gdp) %>% 
+  select("Country Name", "2019","Country Code")
+##Rename columns:
+df_gdp <- df_gdp_temp %>% 
+  rename(
+    iso_code = "Country Code",
+    country = "Country Name",
+    gdp = "2019"
+    )
+##Rename columns:
+df_covid <- df_covid_temp %>% 
+  rename(
+    "cases" = total_cases,
+    "deaths" = total_deaths,
+    "cases_per1M" = total_cases_per_million,
+    "deaths_per1M" = total_deaths_per_million
+    )
+
+## Summaries to check info is okay
+summary(df_covid)
+
+summary(df_gdp)
+```
+
+# Join the Data
+<!-- -------------------------------------------------- -->
+##We are going to calculate GDP per capita so that our measurements to compare the countries are standardized, and we can get more "honest" measurements and comparisons.
+```{r join-covid-data}
+
+df_data_raw <-df_gdp %>%
+  ## Join both databases we have
+            left_join(
+              df_covid,
+              by = "iso_code",
+              na.rm = TRUE
+            ) %>% 
+  ## Whenever the value of GDP is NA or continent is NA, we drop the country because we cant compare it to others. If teh value of a case/death count is NA, we set it to 0
+              drop_na(c(gdp, continent)) %>%
+                replace_na(list("cases" = 0, "deaths" = 0, "cases_per1M" = 0,  "deaths_per1M" = 0)) %>% 
+                  mutate(mortalityRate = (deaths/cases), na.rm = TRUE) %>% 
+                    mutate(gdpPerCap = (gdp/population), na.rm = TRUE) %>% 
+                      select(continent, country, gdpPerCap, date, cases_per1M, deaths_per1M, mortalityRate)
+summary(df_data_norm)
+```
+
+<!-- -------------------------------------------------- -->
+*Graphs and Observations*
+
+
+<!-- -------------------------------------------------- -->
+*Conclusion*
+
+<!-- -------------------------------------------------- -->
+*Questions for the future*

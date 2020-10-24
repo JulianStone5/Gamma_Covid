@@ -73,7 +73,8 @@ df_data_raw <-df_gdp %>%
   ## Whenever teh value of GDP is NA or contintne is NA, we drop the country because we cant compare it to others. If teh value of a case/death count is NA, we set it to 0
               drop_na(gdp) %>% 
                 drop_na(continent) %>% 
-                  replace_na(list("cases" = 0, "deaths" = 0, "cases_per1M" = 0,  "deaths_per1M" = 0))
+                  replace_na(list("cases" = 0, "deaths" = 0, "cases_per1M" = 0,  "deaths_per1M" = 0)) %>% 
+                    mutate(mortalityRate = (deaths/cases), na.rm = TRUE)
 
 df_data_raw
 ```
@@ -86,7 +87,7 @@ We are going to calculate GDP per capita so that our measurements to compare the
 ```{r normalize-gdp-data}
 df_data_norm <- df_data_raw %>% 
                   mutate(gdpPerCap = (gdp/population), na.rm = TRUE) %>% 
-                    select(continent, country, gdpPerCap, date, cases_per1M, deaths_per1M)
+                    select(continent, country, gdpPerCap, date, cases_per1M, deaths_per1M, mortalityRate)
 df_data_norm
 ```
 
@@ -136,19 +137,16 @@ df_data_norm %>%
 ```
 
 ```{r plot-general-data}
-df_continent <- df_data_norm %>% 
-                  group_by(continent) %>% 
-                   summarise_at(vars(gdpPerCap, cases_per1M, deaths_per1M), funs(mean(., na.rm=TRUE)))
-df_continent %>%
+df_data_norm %>% 
+  filter(date == max(date)) %>% 
   ggplot() +
-  geom_col(aes(gdpPerCap, cases_per1M), fill = "blue") +
-  geom_col(aes(gdpPerCap, deaths_per1M), fill = "red") +
-  geom_label_repel(aes(gdpPerCap, cases_per1M, label = continent))+
+  geom_point(aes(gdpPerCap, mortalityRate)) +
   theme_minimal() +
   labs(
     x = "Average GDP Per Capita",
-    y = "Average Cases/Deaths (per 1,000,000 persons)"
-  )
+    y = "Average Mortality Rate"
+  ) + 
+  facet_wrap(~continent, scale = "free")
 ```
 
 # Conclusion
