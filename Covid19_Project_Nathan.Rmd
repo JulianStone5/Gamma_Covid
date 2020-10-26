@@ -23,13 +23,17 @@ url_covid <- "https://raw.githubusercontent.com/owid/covid-19-data/master/public
 ## Set the filenames of the data to download
 filename_covid <- "./data/covid_countries.csv"
 filename_gdp <- "./data/gdp_countries.csv"
+```
 
+```{r}
 ## Download the data locally
 curl::curl_download(
         url_covid,
         destfile = filename_covid
 )
+```
 
+```{r}
 ## Loads the downloaded csv
 df_covid_temp <- read_csv(filename_covid) %>% 
   select(iso_code, continent, date, total_cases, total_deaths, total_cases_per_million, total_deaths_per_million, population)
@@ -84,25 +88,72 @@ df_data_raw %>%
   filter(date == "2020-10-21") %>% 
   arrange(gdpPerCap) %>% 
   mutate(country = fct_reorder(country, desc(gdpPerCap))) %>% 
-  mutate( bin=cut_width(gdpPerCap, width=5, boundary=0) ) %>%
+  mutate( bin=cut_width(gdpPerCap, width=10, boundary=0) ) %>%
   ggplot( aes(x=bin, y=cases_per1M, group=bin)) +
   geom_boxplot(fill="#69b3a2") +
-  xlab("GDP per capita grouped by bins of 5,000")
+  theme_minimal() +
+  coord_flip() +
+  labs(
+    x = "GDP per capita grouped by bins of 10,000",
+    y = "Covid Cases per 1M people",
+    title = "Reported Covid cases versus GDP per capita for each country"
+  )
   # ggplot() + 
   # geom_point(aes(y = country, x = cases_per1M))
 ```
 ```{r}
-p <- diamonds %>%
-  # Add a new column called 'bin': cut the initial 'carat' in bins
-  mutate( bin=cut_width(carat, width=0.5, boundary=0) ) %>%
-  
-  # plot
-  ggplot( aes(x=bin, y=price) ) +
-    geom_boxplot(fill="#69b3a2") +
-    xlab("Carat")
-p
+df_data_raw %>% 
+  filter(date == "2020-10-21") %>% 
+  arrange(gdpPerCap) %>% 
+  mutate(country = fct_reorder(country, desc(gdpPerCap))) %>% 
+  mutate( bin=cut_width(gdpPerCap, width=15, boundary=0) ) %>%
+  ggplot( aes(x=bin, y=cases_per1M, group=bin)) +
+  geom_boxplot(fill="#69b3a2") +
+  facet_wrap(~continent) + 
+  scale_x_discrete() +
+  theme_minimal() +
+  coord_flip() +
+  labs(
+    x = "GDP per capita grouped by bins of 15,000",
+    y = "Covid Cases per 1M people",
+    title = "Reported Covid cases versus GDP per capita for each country, by continent"
+  )
 ```
-
+```{r}
+## Plot with low gdp countries compared to high gdp
+df_data_raw %>% 
+  filter(date == "2020-10-21") %>% 
+  arrange(gdpPerCap) %>% 
+  mutate(country = fct_reorder(country, desc(gdpPerCap))) %>% 
+  mutate( bin=cut_width(gdpPerCap, width=10, boundary=0) ) %>%
+  ggplot( aes(x=bin, y=deaths_per1M/cases_per1M, group=bin)) +
+  geom_boxplot(fill="#69b3a2") +
+  theme_minimal() +
+  coord_flip() +
+  labs(
+    x = "GDP per capita grouped by bins of 10,000",
+    y = "Deaths/Case ratio",
+    title = "Reported Covid Deaths/Cases vs GDP/capita for each country"
+  )
+```
+```{r}
+df_data_raw %>% 
+  filter(date == "2020-10-21") %>% 
+  arrange(gdpPerCap) %>% 
+  mutate(country = fct_reorder(country, desc(gdpPerCap))) %>% 
+  mutate( bin=cut_width(gdpPerCap, width=15, boundary=0) ) %>%
+  ggplot( aes(x=bin, y=deaths_per1M/cases_per1M, group=bin)) +
+  geom_boxplot(fill="#69b3a2") +
+  facet_wrap(~continent) + 
+  scale_x_discrete() +
+  theme_minimal() +
+  coord_flip() +
+  labs(
+    x = "GDP per capita grouped by bins of 15,000",
+    y = "Deaths/Case ratio",
+    title = "Reported Covid Deaths/Cases vs GDP/capita for each country, by continent"
+  )
+```
 
 <!-- -------------------------------------------------- -->
 ##Hopefully well be able to join the data using the ISO code, if not we can use the country name and see what problems that may bring
