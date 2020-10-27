@@ -3,38 +3,31 @@ COVID19\_Report
 Julian, Nabih, Nathan, and Yehya
 20-10-2020
 
-  - [Getting the Data and tidying the
-    data](#getting-the-data-and-tidying-the-data)
-  - [Join the Data](#join-the-data)
-
-``` r
-library(tidyverse)
-```
-
-    ## ── Attaching packages ────────────────────────── tidyverse 1.3.0 ──
-
-    ## ✓ ggplot2 3.3.2     ✓ purrr   0.3.4
-    ## ✓ tibble  3.0.3     ✓ dplyr   1.0.2
-    ## ✓ tidyr   1.1.2     ✓ stringr 1.4.0
-    ## ✓ readr   1.3.1     ✓ forcats 0.5.0
-
-    ## ── Conflicts ───────────────────────────── tidyverse_conflicts() ──
-    ## x dplyr::filter() masks stats::filter()
-    ## x dplyr::lag()    masks stats::lag()
+  - [*Background*](#background)
+  - [*Question*](#question)
+  - [*Data*](#data)
+      - [Getting the Data and tidying the
+        data](#getting-the-data-and-tidying-the-data)
+      - [Join the Data](#join-the-data)
+  - [*Graphs and Observations*](#graphs-and-observations)
+  - [*Conclusion*](#conclusion)
+  - [*Questions for the future*](#questions-for-the-future)
 
 <!-- -------------------------------------------------- -->
 
-*Background*: COVID-19 is a newly discovered (in 2019) virus in humans
-that mainly attacks the respiratory system. It has been thought to have
-mutated from the severe acute respiratory syndrome coronavirus 2
-(SARS-CoV-2) virus. Some statistics about COVID-19 (according to the
-CDC): around 14%-19% of people with COVID are hospitalized and 3%-5% of
-people need to go to the ICU (Intensive Care Unit). The main reason for
-its quick spread to a pandemic is the fact that it has an incubation
-period of 2-14 days and many people do not develop symptoms during that
-period. The risks from contracting COVID depend on age group and
-pre-existing conditions. Older age groups and people with pre-existing
-conditions are more likely to experience complications with COVID.
+# *Background*
+
+COVID-19 is a newly discovered (in 2019) virus in humans that mainly
+attacks the respiratory system. It has been thought to have mutated from
+the severe acute respiratory syndrome coronavirus 2 (SARS-CoV-2) virus.
+Some statistics about COVID-19 (according to the CDC): around 14%-19% of
+people with COVID are hospitalized and 3%-5% of people need to go to the
+ICU (Intensive Care Unit). The main reason for its quick spread to a
+pandemic is the fact that it has an incubation period of 2-14 days and
+many people do not develop symptoms during that period. The risks from
+contracting COVID depend on age group and pre-existing conditions. Older
+age groups and people with pre-existing conditions are more likely to
+experience complications with COVID.
 
 According to Our World in Data, countries with higher GDP tend to spend
 more money on PPP and healthcare. This then begs the question, what is
@@ -44,20 +37,51 @@ truth in this study.
 
 <!-- -------------------------------------------------- -->
 
-*Question*: We set out to answer the question of whether or not the per
-capita GDP of nations around the world had any relationship with the
-total number of reported cases (per million persons) of the respective
-nations. We were wondering if the proportional wealth of each nation
-could have an affect on the number of cases each nation has. We
-hypothesized that if a country had more wealth per person that they
-would most likely have access to better education and resources to
-better prepare for a pandemic and thus would have fewer cases.
+# *Question*
+
+We set out to answer the question of whether or not the per capita GDP
+of nations around the world had any relationship with the total number
+of reported cases (per million persons) of the respective nations. We
+were wondering if the proportional wealth of each nation could have an
+affect on the number of cases each nation has. We hypothesized that if a
+country had more wealth per person that they would most likely have
+access to better education and resources to better prepare for a
+pandemic and thus would have fewer cases.
 
 <!-- -------------------------------------------------- -->
 
-*Data*:
+# *Data*
 
-# Getting the Data and tidying the data
+For our project, we have two main sources of data: our COVID-19 dataset,
+and our GDP dataset. The COVID-19 dataset we got from [this GitHub
+repo](https://github.com/owid/covid-19-data/tree/master/public/data)
+create by [Our World in Data](https://ourworldindata.org/) a group of
+researcher who seek to research and develop data to make progress
+against the world’s largest problems. Data produced by this group has
+been used for teaching at top universities like Harvard and Oxford, and
+for research in over 500 different papers and articles, from sources
+ranging from The New York Times to the Science Journal. This dataset is
+updated daily to show how our COVID-19 cases and deaths are developing
+worldwide, so each time our code is run the data will change a little
+because of the new datapoints added. Our other dataset is coming from
+[The World Bank](https://data.worldbank.org/indicator/NY.GDP.MKTP.CD)
+and gives us the most recent GDP values for different countries around
+the world, which as of now is the 2019 value.
+
+We are joining these two datasets by using each country’s ISO code. This
+is a 3 letter unique code that represents each country. Besides that, we
+also have what continent each country belongs to (which is given by both
+datasets). Our COVID-19 dataset is also giving us Total Cases, Total
+Deaths, Cases per million persons, Deaths per million persons, and
+population of each country, with the first 4 of those values also coming
+with the date when they were reported. Our GDP dataset is giving us the
+GDP for each country, with the other columns being used to line it up to
+its COVID-19 counterpart. One important caveat of the COVID-19 dataset:
+values that have not been reported show up as N/A instead of 0, so we
+replaced all these values to be able to have an understandable graph for
+the same time spans for all our countries.
+
+### Getting the Data and tidying the data
 
 <!------------------------------------------------------>
 
@@ -97,11 +121,11 @@ df_covid <- df_covid_temp %>%
     )
 ```
 
-# Join the Data
+### Join the Data
 
 <!-- -------------------------------------------------- -->
 
-\#\#We are going to calculate GDP per capita so that our measurements to
+We are going to calculate GDP per capita so that our measurements to
 compare the countries are standardized, and we can get more “honest”
 measurements and comparisons.
 
@@ -123,16 +147,42 @@ df_data_norm <- df_data_raw %>%
 
 <!-- -------------------------------------------------- -->
 
-*Graphs and Observations*
+# *Graphs and Observations*
 
-\[Insert Nathan’s graph\]
+``` r
+## Plot with low gdp countries compared to high gdp
+df_data_norm %>% 
+  filter(date == "2020-10-21") %>% 
+  mutate(gdpPerCap = gdpPerCap/1000) %>% 
+  arrange(gdpPerCap) %>% 
+  mutate(country = fct_reorder(country, desc(gdpPerCap))) %>% 
+  mutate( bin=cut_width(gdpPerCap, width=10, boundary=0) ) %>%
+  ggplot( aes(x=bin, y=cases_per1M, group=bin)) +
+  geom_boxplot(fill="#69b3a2") +
+  theme_minimal() +
+  coord_flip() +
+  labs(
+    x = "GDP per capita grouped by bins of 10,000",
+    y = "Covid Cases per 1M people",
+    title = "Reported Covid cases versus GDP per capita for each country"
+  )
+```
 
-Above is another plot that shows the same data as the previous plot
-broken apart by continent. There are several things that we noticed from
-these graphs: - GDP’s are very different continent to continent, for
-example Africa has much lower GDPs - In Europe and Asia where there is
-the largest range of GDP’s there isn’t a clear relationship between GDP
-and case counts
+![](Covid19_Report_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
+
+The above figure shows the number of reported COVID cases versus the gdp
+per capita of the country.
+
+  - From this graph we notice several interesting things:
+
+  - Case counts per 1m people appear to increase as GDP increases, this
+    is contradictory to our hypothesis
+
+  - Lowest GDP bracket countries have the lowest reported cases
+
+  - The 60-70,000 GDP bracket looks like an outlier
+
+<!-- end list -->
 
 ``` r
 df_data_norm %>%
@@ -197,7 +247,7 @@ relationship.
 
 <!-- -------------------------------------------------- -->
 
-*Conclusion*
+# *Conclusion*
 
 In general, when looking at our data, we can see that our hypothesis was
 completely wrong. We believed that lower GDP would have a correlation to
@@ -237,31 +287,25 @@ in determining the effect of COVID-19 on a country.
 
 <!-- -------------------------------------------------- -->
 
-*Questions for the future*
+# *Questions for the future*
 
 The above conclusions provide an answer to our hypothesis but they also
 spur us towards other questions. Some of the questions and extensions
-that we are interested in include: - Examining the relationship between
-gdp per capita at a state and county level in the US. We are curious if
-the trends we saw at a global level are also present at other
-populations sizes. Are these trends consistent between different
-countries? - What unites, if anything, the outliers in our gdp / covid
-graph. For example maybe smaller or larger countries follow very
-different trends. - Are there better metrics to look at how well
-different nations dealt with COVID? For example, counting cases likely
-exhibits lots of reporting bias etc. Maybe looking at inflation or gold
-prices etc within a country could explain which countries were more
-stable. - We were also interested in the death/case ratio, we plotted
-that below
+that we are interested in include:
 
-\[Insert graph here\]
+  - Examining the relationship between gdp per capita at a state and
+    county level in the US. We are curious if the trends we saw at a
+    global level are also present at other populations sizes. Are these
+    trends consistent between different countries?
 
-This shows the number of reported deaths/cases ratio across different
-GDP brackets. When compared to the case incidence rate there are some
-interesting behaviors. - Overall the shape of the death/case curve is
-very different than just the case curve - It appears that the 60-70,000
-gdp bracket has the lowest average death/case rate even though they had
-one of the higher case rates - The lower gdp brackets had low case
-counts but higher deaths/case - This leads to a larger design question
-of whether deaths per case may be a better metric to evaluate how
-countries were affected by the pandemic rather than just reported cases
+  - What unites, if anything, the outliers in our gdp / covid graph. For
+    example maybe smaller or larger countries follow very different
+    trends.
+
+  - Are there better metrics to look at how well different nations dealt
+    with COVID? For example, counting cases likely exhibits lots of
+    reporting bias etc. Maybe looking at inflation or gold prices etc
+    within a country could explain which countries were more stable.
+
+  - We were also interested in the death/case ratio (look at our source
+    if interested)
