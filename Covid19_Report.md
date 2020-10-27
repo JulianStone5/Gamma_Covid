@@ -1,4 +1,4 @@
-COVID19\_Report
+COVID-19 Report
 ================
 Julian, Nabih, Nathan, and Yehya
 20-10-2020
@@ -53,10 +53,10 @@ pandemic and thus would have fewer cases.
 # *Data*
 
 For our project, we have two main sources of data: our COVID-19 dataset,
-and our GDP dataset. The COVID-19 dataset we got from [this GitHub
-repo](https://github.com/owid/covid-19-data/tree/master/public/data)
-create by [Our World in Data](https://ourworldindata.org/) a group of
-researcher who seek to research and develop data to make progress
+and our GDP dataset. The COVID-19 dataset is from [this GitHub
+repo](https://github.com/owid/covid-19-data/tree/master/public/data) and
+is created by [Our World in Data](https://ourworldindata.org/), a group
+of researchers who seek to research and develop data to make progress
 against the world’s largest problems. Data produced by this group has
 been used for teaching at top universities like Harvard and Oxford, and
 for research in over 500 different papers and articles, from sources
@@ -149,10 +149,17 @@ df_data_norm <- df_data_raw %>%
 
 # *Graphs and Observations*
 
+First we wanted to find a clean way of showing the data for all
+countries in one plot to observe if there were any obvious trends on
+first glance. Since the world has a large number of countries with a
+large range of per capita GDP’s, we decided it would be best to group
+them into bins with each bin representing $10,000 more GDP per capita.
+The result is plotted below.
+
 ``` r
 ## Plot with low gdp countries compared to high gdp
 df_data_norm %>% 
-  filter(date == "2020-10-21") %>% 
+  filter(date == max(date)) %>% 
   mutate(gdpPerCap = gdpPerCap/1000) %>% 
   arrange(gdpPerCap) %>% 
   mutate(country = fct_reorder(country, desc(gdpPerCap))) %>% 
@@ -160,29 +167,34 @@ df_data_norm %>%
   ggplot( aes(x=bin, y=cases_per1M, group=bin)) +
   geom_boxplot(fill="#69b3a2") +
   theme_minimal() +
+  theme(plot.title = element_text(hjust=.5)) + 
   coord_flip() +
   labs(
     x = "GDP per capita grouped by bins of 10,000",
     y = "Covid Cases per 1M people",
-    title = "Reported Covid cases versus GDP per capita for each country"
+    title = "Reported COVID Cases versus Country GDP per capita"
   )
 ```
 
 ![](Covid19_Report_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
 
 The above figure shows the number of reported COVID cases versus the gdp
-per capita of the country.
-
-  - From this graph we notice several interesting things:
+per capita of the country. From this graph we notice several interesting
+things:
 
   - Case counts per 1m people appear to increase as GDP increases, this
     is contradictory to our hypothesis
 
   - Lowest GDP bracket countries have the lowest reported cases
 
-  - The 60-70,000 GDP bracket looks like an outlier
+  - The 60-70,000 GDP bracket looks like an outlier compared to other
+    bins
 
-<!-- end list -->
+From this plot alone, it is difficult to determine any noticeable trend,
+so we wanted to find a way to better split the data up. Since the spread
+of COVID is very much based on regions of the world, we believed that a
+natural division would be to split the data based on continent and
+analyze if there are similar trends between the regions of the world.
 
 ``` r
 df_data_norm %>%
@@ -195,9 +207,11 @@ df_data_norm %>%
                 formula=y ~ poly(x, 1, raw=TRUE),colour="red") +
   facet_wrap(~ continent) +
   theme_minimal() +
+  theme(plot.title = element_text(hjust=.5)) + 
   labs(
     x = "GDP Per Capita",
-    y = "Cases (per 1,000,000 persons)"
+    y = "Cases (per 1,000,000 persons)",
+    title = "Reported COVID Cases versus GDP per capita"
   )
 ```
 
@@ -225,11 +239,13 @@ df_data_norm %>%
   facet_wrap(~ continent, scale = "free") +
   theme_minimal() +
   theme(
-    axis.text.x = element_text(angle = 45)
+    axis.text.x = element_text(angle = 45),
+    plot.title = element_text(hjust=.5)
   ) +
   labs(
     x = "GDP Per Capita",
-    y = "Cases (per 1,000,000 persons)"
+    y = "Cases (per 1,000,000 persons)",
+    title = "Reported COVID Cases versus GDP per capita"
   )
 ```
 
@@ -307,5 +323,5 @@ that we are interested in include:
     reporting bias etc. Maybe looking at inflation or gold prices etc
     within a country could explain which countries were more stable.
 
-  - We were also interested in the death/case ratio (look at our source
-    if interested)
+  - We were also interested in the relationship between death/case ratio
+    and GDP per capita (look at our source if interested)
